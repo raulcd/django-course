@@ -98,3 +98,23 @@ INSTALLED_APPS = (
     'restApi.videoclub',
     'restApi.users',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+"django.contrib.auth.context_processors.auth",
+"django.core.context_processors.debug",
+"django.core.context_processors.i18n",
+"django.core.context_processors.media",
+"django.core.context_processors.static",
+"django.contrib.messages.context_processors.messages",
+"processors.context_processors.today")
+
+
+AUTHENTICATION_BACKENDS = (
+    #'authentication.ldap_backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+#LDAP Backend settings
+AD_LDAP_URL = 'ldap://'
+AD_SEARCH_DN = ''
+
