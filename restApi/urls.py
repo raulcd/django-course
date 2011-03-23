@@ -8,6 +8,8 @@ urlpatterns = patterns('',
     # Example:
     # (r'^restApi/', include('restApi.foo.urls')),
 
+    (r'^user(s)?/', include('users.urls')),
+
     # Uncomment the admin/doc line below to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
