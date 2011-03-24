@@ -42,5 +42,5 @@ class LDAPBackend:
             l.simple_bind_s(settings.AD_SEARCH_DN % (username), password)
             l.unbind_s()
             return True
-        except ldap.LDAPError, e:
+        except Exception, e:
             return False

@@ -95,8 +95,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'restApi.videoclub',
     'restApi.users',
+    'restApi.videoclub',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -106,7 +106,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 "django.core.context_processors.media",
 "django.core.context_processors.static",
 "django.contrib.messages.context_processors.messages",
-"processors.context_processors.today")
+"processors.context_processors.today",)
 
 
 AUTHENTICATION_BACKENDS = (
@@ -115,6 +115,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 #LDAP Backend settings
-AD_LDAP_URL = 'ldap://'
+AD_LDAP_URL = ''
 AD_SEARCH_DN = ''
 
