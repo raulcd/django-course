@@ -110,11 +110,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 AUTHENTICATION_BACKENDS = (
-    #'authentication.ldap_backend.LDAPBackend',
+    #'authentication.ldap_backend.LDAPBackend',  # to use it python-ldap must be installed
     'django.contrib.auth.backends.ModelBackend',
 )
 
 #LDAP Backend settings
-AD_LDAP_URL = ''
-AD_SEARCH_DN = ''
+AD_LDAP_URL = 'ldap://port:host'
+AD_SEARCH_DN = 'uid=%s,ou=users,dc=cpr,dc=inet'
 

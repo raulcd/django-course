@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.conf import settings
-import ldap
+import ldap         # to use it python-ldap must be installed
 
 class LDAPBackend:
     
