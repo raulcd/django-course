@@ -1,12 +1,12 @@
 from django.conf.urls.defaults import *
 from piston.resource import Resource
-from users.views import *
-from piston.authentication import HttpBasicAuthentication
-
-user_resource = Resource(handler=UserHandler)
+from users.views import UserView, UserViewRoot
 
 urlpatterns = patterns('',
-   # Response content type: json
-   url(r'^(?P<user_id>[^/]+)$', user_resource, {'emitter_format': 'json'}),
-   url(r'^$', user_resource, {'emitter_format': 'json'}),
+   url(r'^(?P<user_id>[^/]+)$',
+        UserView.as_view(),
+        name='user'),
+   url(r'^$',
+        UserViewRoot.as_view(),
+        name='user_root'),
 )

@@ -1,80 +1,104 @@
-from piston.handler import BaseHandler
-from piston.utils import require_mime, rc
-from django.contrib.auth.models import User
+from djangorestframework.views import View
+from djangorestframework.renderers import JSONRenderer
+from djangorestframework.response import Response
+from djangorestframework.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND,\
+    HTTP_200_OK, HTTP_204_NO_CONTENT
+from djangorestframework.resources import ModelResource
+from django.contrib.auth.models import User, Group
+from djangorestframework.parsers import JSONParser
 
-class UserHandler(BaseHandler):
-    # Model to tie to
+
+class GroupResource(ModelResource):
+    model = Group
+    fields = ('id', 'name',)
+
+
+class UserResource(ModelResource):
     model = User
-    # Allowed HTTP methods
-    allowed_methods = ('GET', 'POST', 'PUT', 'DELETE',)
-    # List of fields to include in response
-    fields = ('id', 'username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser', 'last_login', 'date_joined', ('groups', ('id', 'name')))
+    fields = ('id', 'username', 'first_name', 'last_name',
+              'email', 'is_staff', 'is_active', 'is_superuser',
+              'last_login', 'date_joined', ('groups', GroupResource))
 
+
+class UserView(View):
+    # Only return application/json response content
+    renderers = (JSONRenderer,)
+    # Only accept application/json request content
+    parsers = (JSONParser,)
+    resource = UserResource
 
     # Response implementation of GET requests
-    def read(self, request, user_id=None):
-        if user_id: # querying for a specific user
+    def get(self, request, user_id):
+        try:
             if request.user.is_superuser or request.user.id == user_id:
-                return User.objects.get(pk=user_id) # return a user
-        elif request.user.is_superuser: # querying for all user
-            return User.objects.all() # return all users
-        
-        return rc.FORBIDDEN
+                return User.objects.get(pk=user_id)  # return a user
 
+            return Response(status=HTTP_403_FORBIDDEN)
+        except User.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)  # returns HTTP 404
 
-    # Response implementation of POST requests
-    # Only accept application/json content type
-    @require_mime('json',)
-    def create(self, request):
-        if not request.user.is_superuser:
-            return rc.FORBIDDEN # returns HTTP 401
-        # Request body
-        data = request.data
-        # Saving user
-        user = User()
-        for key in data.iterkeys():
-            # Setting user field (key)
-            user.__dict__[key] = data[key]
-        user.save()
-        
-        return user
-        
-    
     # Response implementation of PUT requests
-    # Only accept application/json content type
-    @require_mime('json',)
-    def update(self, request, user_id=None):
-        try: 
-            if not request.user.id or (request.user.id != user_id and not request.user.is_superuser):
-                return rc.FORBIDDEN # returns HTTP 401
-            
+    def put(self, request, user_id):
+        try:
+            if (not request.user.id) or (request.user.id != user_id and not request.user.is_superuser):
+                return Response(status=HTTP_403_FORBIDDEN)  # returns HTTP 403
+
             # Request body
-            data = request.data
-            
+            data = self.DATA
+
             # Updating user
             user = User.objects.get(pk=user_id)
             for key in data.iterkeys():
                 # Updating user field (key)
                 user.__dict__[key] = data[key]
             user.save()
-            
-            return rc.ALL_OK
-            
-        except User.DoesNotExist:         
-            return rc.NOT_FOUND # returns HTTP 404
 
+            return Response(status=HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)  # returns HTTP 404
 
     # Response implementation of DELETE requests
-    def delete(self, request, user_id=None):
+    def delete(self, request, user_id):
         try:
-            if not request.user.id or (request.user.id != user_id and not request.user.is_superuser):
-                return rc.FORBIDDEN # returns HTTP 401
-            
-            # Deleting user    
+            if (not request.user.id) or (request.user.id != user_id and not request.user.is_superuser):
+                return Response(status=HTTP_403_FORBIDDEN)  # returns HTTP 403
+
+            # Deleting user
             user = User.objects.get(pk=user_id)
             user.delete()
-            
-            return rc.DELETED # returns HTTP 204
-    
-        except User.DoesNotExist:         
-            return rc.NOT_FOUND # returns HTTP 404
+
+            return Response(status=HTTP_204_NO_CONTENT)  # returns HTTP 204
+
+        except User.DoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND)  # returns HTTP 404
+
+
+class UserViewRoot(View):
+    # Only return application/json response content
+    renderers = (JSONRenderer,)
+    # Only accept application/json request content
+    parsers = (JSONParser,)
+    resource = UserResource
+
+    # Response implementation of GET requests
+    def get(self, request):
+        if request.user.is_superuser:
+            return User.objects.all()  # return all users
+
+        return Response(status=HTTP_403_FORBIDDEN)
+
+    # Response implementation of POST requests
+    def post(self, request):
+        if not request.user.is_superuser:
+            return Response(status=HTTP_403_FORBIDDEN)  # returns HTTP 403
+        # Request body
+        data = self.DATA
+        # Saving user
+        user = User()
+        for key in data.iterkeys():
+            # Setting user field (key)
+            user.__dict__[key] = data[key]
+        user.save()
+
+        return user
